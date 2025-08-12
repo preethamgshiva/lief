@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  name      String
+  role      UserRole @default(EMPLOYEE)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  employee Employee?
+  manager  Manager?
+
+  @@map("users")
+}
+
+model Employee {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @unique @db.ObjectId
+  employeeId   String   @unique
+  department   String
+  position     String
+  hireDate     DateTime
+  password     String
+  isClockedIn  Boolean  @default(false)
+  lastClockIn  DateTime?
+  lastClockOut DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timeEntries TimeEntry[]
+  manager     Manager?     @relation(fields: [managerId], references: [id])
+  managerId   String?      @db.ObjectId
+
+  @@map("employees")
+  @@index([managerId])
+}
+
+model Manager {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @unique @db.ObjectId
+  facility  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employees Employee[]
+  facilitySettings FacilitySettings?
+
+  @@map("managers")
+}
+
+model TimeEntry {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId  String      @db.ObjectId
+  type        EntryType
+  timestamp   DateTime
+  latitude    Float?
+  longitude   Float?
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  employee   Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("time_entries")
+  @@index([employeeId])
+  @@index([timestamp])
+}
+
+model FacilitySettings {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  managerId String   @unique @db.ObjectId
+  facility  String
+  latitude  Float
+  longitude Float
+  radius    Float    @default(100) // meters
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  manager Manager @relation(fields: [managerId], references: [id], onDelete: Cascade)
+
+  @@map("facility_settings")
+}
+
+enum UserRole {
+  EMPLOYEE
+  MANAGER
+  ADMIN
+}
+
+enum EntryType {
+  CLOCK_IN
+  CLOCK_OUT
+  BREAK_START
+  BREAK_END
+}

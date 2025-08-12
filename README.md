@@ -9,25 +9,21 @@ This is my submission for the Lief WebDev Engineer Task - a healthcare worker cl
 ### ✅ Required Features - Manager Portal
 
 #### 1. Location Perimeter Setting
-- **Status**: ✅ **IMPLEMENTED**
 - **Description**: Managers can set a location perimeter (e.g., within 2km of a location) where care workers can clock in
 - **Implementation**: Facility settings page with latitude/longitude coordinates and configurable radius in meters
 - **Location**: `frontend/src/components/FacilityManager.tsx`
 
 #### 2. Staff Clock-in Status Table
-- **Status**: ✅ **IMPLEMENTED**
 - **Description**: See a table of all staff who are currently clocked in
 - **Implementation**: Real-time dashboard showing currently active staff with their clock-in times
 - **Location**: `frontend/src/components/StaffDashboard.tsx`
 
 #### 3. Individual Staff Time Tracking
-- **Status**: ✅ **IMPLEMENTED**
 - **Description**: For each staff member, see when and where they clocked in and clocked out
 - **Implementation**: Comprehensive time tracking table with GPS coordinates, timestamps, and location data
 - **Location**: `frontend/src/app/manager/page.tsx` - Staff Time Tracking view
 
 #### 4. Analytics Dashboard
-- **Status**: ✅ **IMPLEMENTED**
 - **Description**: Dashboard showing:
   - Average hours people are spending clocked in each day
   - Number of people clocking in each day
@@ -38,28 +34,23 @@ This is my submission for the Lief WebDev Engineer Task - a healthcare worker cl
 ### ✅ Required Features - Care Worker Portal
 
 #### 1. Clock In Functionality
-- **Status**: ✅ **IMPLEMENTED**
 - **Description**: Care workers can clock in when they enter the perimeter
 - **Implementation**: GPS-based perimeter validation using Haversine formula
 - **Location**: `frontend/src/app/care-worker/page.tsx`
 
 #### 2. Optional Notes on Clock In
-- **Status**: ✅ **IMPLEMENTED**
 - **Description**: When clocking in, care workers can provide an optional note
 - **Implementation**: Text area for notes during clock-in process
 
 #### 3. Perimeter Validation
-- **Status**: ✅ **IMPLEMENTED**
 - **Description**: App tells care workers they cannot clock in when outside the perimeter
 - **Implementation**: Real-time location checking with error messages
 
 #### 4. Clock Out Functionality
-- **Status**: ✅ **IMPLEMENTED**
 - **Description**: Care workers can clock out when they are already clocked in
 - **Implementation**: Clock-out button with optional notes
 
 #### 5. Optional Notes on Clock Out
-- **Status**: ✅ **IMPLEMENTED**
 - **Description**: When clocking out, care workers can provide an optional note
 - **Implementation**: Text area for notes during clock-out process
 

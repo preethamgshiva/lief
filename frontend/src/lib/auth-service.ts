@@ -39,6 +39,17 @@ export class AuthService {
         return btoa(password + 'salt'); // Base64 encoding with salt
     }
 
+    // Decode hashed password back to original (for display purposes)
+    private static decodePassword(hashedPassword: string): string {
+        try {
+            const decoded = atob(hashedPassword);
+            // Remove the 'salt' suffix
+            return decoded.replace('salt', '');
+        } catch (error) {
+            return 'Password unavailable';
+        }
+    }
+
     private static verifyPassword(password: string, storedPassword: string): boolean {
         // Hash the input password and compare with stored hashed password
         const hashedInputPassword = this.hashPassword(password);
@@ -206,7 +217,7 @@ export class AuthService {
 
     static async getAllEmployees() {
         try {
-            return await prisma.employee.findMany({
+            const employees = await prisma.employee.findMany({
                 select: {
                     id: true,
                     employeeId: true,
@@ -235,6 +246,12 @@ export class AuthService {
                     },
                 },
             });
+
+            // Decode passwords for display purposes
+            return employees.map(employee => ({
+                ...employee,
+                originalPassword: this.decodePassword(employee.password)
+            }));
         } catch (error) {
             console.error('Error getting all employees:', error);
             return [];

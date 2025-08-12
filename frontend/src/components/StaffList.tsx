@@ -9,26 +9,35 @@ interface StaffListProps {
 }
 
 export default function StaffList({ staffMembers, onRemoveWorker, isLoading }: StaffListProps) {
-  // Function to get plain text password from hashed password
-  const getPlainTextPassword = (hashedPassword: string): string => {
-    // Common password mappings based on our sample data
-    const passwordMap: { [key: string]: string } = {
-      'bWFuYWdlcjEyM3NhbHQ=': 'manager123', // hashPassword('manager123')
-      'ZW1wbG95ZWUxMjNzYWx0': 'employee123', // hashPassword('employee123')
-    };
-    
-    // If we have a mapping, return the plain text password
-    if (passwordMap[hashedPassword]) {
-      return passwordMap[hashedPassword];
+  // Function to get plain text password from the originalPassword field
+  const getPlainTextPassword = (member: any): string => {
+    // Use the originalPassword field if available (from AuthService.getAllEmployees)
+    if (member.originalPassword) {
+      return member.originalPassword;
     }
     
-    // If no mapping found, show a hint that it's hashed
-    if (hashedPassword && hashedPassword.length > 20) {
-      return '[Hashed Password]';
+    // Fallback to the old method for backward compatibility
+    if (member.password) {
+      // Common password mappings based on our sample data
+      const passwordMap: { [key: string]: string } = {
+        'bWFuYWdlcjEyM3NhbHQ=': 'manager123', // hashPassword('manager123')
+        'ZW1wbG95ZWUxMjNzYWx0': 'employee123', // hashPassword('employee123')
+      };
+      
+      // If we have a mapping, return the plain text password
+      if (passwordMap[member.password]) {
+        return passwordMap[member.password];
+      }
+      
+      // If no mapping found, show a hint that it's hashed
+      if (member.password.length > 20) {
+        return '[Hashed Password]';
+      }
     }
     
-    return hashedPassword || 'N/A';
+    return 'N/A';
   };
+
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-6">
@@ -130,16 +139,17 @@ export default function StaffList({ staffMembers, onRemoveWorker, isLoading }: S
                   <div className="flex items-center space-x-2">
                     <div className="relative group">
                       <code className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs font-mono">
-                        {getPlainTextPassword(member.password || '') || 'N/A'}
+                        {getPlainTextPassword(member)}
                       </code>
+                      {/* Show tooltip with hashed password for debugging */}
                       {member.password && member.password.length > 20 && (
                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                          Original: {member.password}
+                          Hashed: {member.password.substring(0, 20)}...
                         </div>
                       )}
                     </div>
                     <button
-                      onClick={() => navigator.clipboard.writeText(getPlainTextPassword(member.password || '') || '')}
+                      onClick={() => navigator.clipboard.writeText(getPlainTextPassword(member) || '')}
                       className="text-blue-600 hover:text-blue-800 transition-colors"
                       title="Copy password"
                     >

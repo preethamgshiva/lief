@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import StaffDashboard from '../../components/StaffDashboard';
 import StaffManager from '../../components/CareWorkerManager';
 import FacilityManager from '../../components/FacilityManager';
+import SignupRequestManager from '../../components/SignupRequestManager';
 
 // Simple user interface
 interface User {
@@ -105,7 +106,7 @@ function LoginForm({ onLogin }: { onLogin: (user: User) => void }) {
             </div>
 
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                 {error}
               </div>
             )}
@@ -113,20 +114,38 @@ function LoginForm({ onLogin }: { onLogin: (user: User) => void }) {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 px-4 rounded-lg font-semibold text-white transition-colors ${
+              className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
                 isLoading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
+                  ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
               }`}
             >
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
+          {/* Return to Home Button */}
           <div className="mt-6 text-center">
-            <a href="/" className="text-blue-600 hover:text-blue-700 text-sm">
-              ← Back to Home
-            </a>
+            <button
+              onClick={() => window.location.href = '/'}
+              className="inline-flex items-center px-4 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Return to Home
+            </button>
+          </div>
+
+          {/* Test Manager Login Details */}
+          <div className="mt-4 p-3 bg-orange-200 rounded-lg border border-gray-200">
+            <p className="text-sm text-gray-600 text-center mb-2">
+              <strong>Test Manager Login:</strong>
+            </p>
+            <div className="text-xs text-gray-500 text-center space-y-1">
+              <p><strong>Employee ID:</strong> MGR001</p>
+              <p><strong>Password:</strong> manager123</p>
+            </div>
           </div>
         </div>
       </div>
@@ -135,13 +154,12 @@ function LoginForm({ onLogin }: { onLogin: (user: User) => void }) {
 }
 
 // Main dashboard component
-function Dashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
-  const [staffMembers, setStaffMembers] = useState([]);
-  const [timeEntries, setTimeEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
+function ManagerDashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
+  const [activeView, setActiveView] = useState<'overview' | 'charts' | 'staff' | 'facility' | 'applications'>('overview');
+  const [staffMembers, setStaffMembers] = useState<any[]>([]);
+  const [timeEntries, setTimeEntries] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [chartRefreshTrigger, setChartRefreshTrigger] = useState(0);
-  const [activeView, setActiveView] = useState<'overview' | 'charts' | 'staff' | 'facility'>('overview');
 
   useEffect(() => {
     fetchDashboardData();
@@ -149,25 +167,33 @@ function Dashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
 
   const fetchDashboardData = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       setError('');
 
-             // Fetch staff members
-       const staffResponse = await fetch('/api/employees');
-       if (!staffResponse.ok) throw new Error('Failed to fetch staff data');
-       const staffData = await staffResponse.json();
-       setStaffMembers(staffData.employees || []);
+      // Fetch staff members
+      const staffResponse = await fetch('/api/employees');
+      const staffData = await staffResponse.json();
+
+      if (!staffResponse.ok) {
+        throw new Error(staffData.error || 'Failed to fetch staff data');
+      }
+
+      setStaffMembers(staffData.employees || []);
 
       // Fetch time entries
       const timeResponse = await fetch('/api/time-entries');
-      if (!timeResponse.ok) throw new Error('Failed to fetch time entries');
       const timeData = await timeResponse.json();
+
+      if (!timeResponse.ok) {
+        throw new Error(timeData.error || 'Failed to fetch time entries');
+      }
+
       setTimeEntries(timeData.timeEntries || []);
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch data');
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -175,23 +201,13 @@ function Dashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
     fetchDashboardData();
   };
 
-  const handleWorkerAdded = () => {
-    fetchDashboardData();
-    setChartRefreshTrigger(prev => prev + 1);
-  };
-
-  const handleWorkerRemoved = () => {
-    fetchDashboardData();
-    setChartRefreshTrigger(prev => prev + 1);
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading dashboard...</p>
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-gray-600">Loading dashboard...</span>
           </div>
         </div>
       </div>
@@ -228,7 +244,8 @@ function Dashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
               Welcome back, {user.name}! {activeView === 'overview' ? "Here's your team overview." : 
               activeView === 'charts' ? "View detailed analytics and charts." :
               activeView === 'staff' ? "Manage your staff and view time tracking." :
-              "Configure facility settings and parameters."}
+              activeView === 'facility' ? "Configure facility settings and parameters." :
+              "Review and manage care worker applications."}
             </p>
             <p className="text-sm text-gray-500 mt-1">
               Position: {user.position || 'N/A'} • Department: {user.department || 'N/A'}
@@ -284,6 +301,16 @@ function Dashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
               }`}
             >
               🏢 Facility Settings
+            </button>
+            <button
+              onClick={() => setActiveView('applications')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeView === 'applications'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              📝 Applications
             </button>
           </div>
         </div>
@@ -393,18 +420,18 @@ function Dashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Analytics & Charts</h3>
             <p className="text-gray-600 mb-4">Comprehensive analytics and performance metrics</p>
-            <StaffDashboard onRefresh={handleRefresh} refreshTrigger={chartRefreshTrigger} />
+            <StaffDashboard onRefresh={handleRefresh} refreshTrigger={0} />
           </div>
         )}
 
         {activeView === 'staff' && (
           <div className="mb-8">
             <StaffManager 
-              onWorkerAdded={handleWorkerAdded}
-              onWorkerRemoved={handleWorkerRemoved}
+              onWorkerAdded={handleRefresh}
+              onWorkerRemoved={handleRefresh}
             />
             <div className="mt-8">
-              <StaffDashboard onRefresh={handleRefresh} refreshTrigger={chartRefreshTrigger} />
+              <StaffDashboard onRefresh={handleRefresh} refreshTrigger={0} />
             </div>
           </div>
         )}
@@ -414,13 +441,19 @@ function Dashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
             <FacilityManager onSettingsChanged={handleRefresh} />
           </div>
         )}
+
+        {activeView === 'applications' && (
+          <div className="mb-8">
+            <SignupRequestManager />
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 // Main component
-export default function ManagerDashboard() {
+export default function ManagerPage() {
   const [user, setUser] = useState<User | null>(null);
 
   const handleLogin = (userData: User) => {
@@ -433,7 +466,7 @@ export default function ManagerDashboard() {
 
   // Show login form if no user, otherwise show dashboard
   return user ? (
-    <Dashboard user={user} onLogout={handleLogout} />
+    <ManagerDashboard user={user} onLogout={handleLogout} />
   ) : (
     <LoginForm onLogin={handleLogin} />
   );

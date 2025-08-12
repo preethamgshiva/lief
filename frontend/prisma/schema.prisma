@@ -99,6 +99,27 @@ model FacilitySettings {
   @@map("facility_settings")
 }
 
+model SignupRequest {
+  id                   String           @id @default(auto()) @map("_id") @db.ObjectId
+  name                 String
+  email                String           @unique
+  phone                String
+  experience           String
+  preferredDepartment  String?
+  message              String?
+  status               SignupStatus     @default(PENDING)
+  submittedAt          DateTime         @default(now())
+  reviewedAt           DateTime?
+  reviewedBy           String?          @db.ObjectId
+  reviewNotes          String?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  @@map("signup_requests")
+  @@index([status])
+  @@index([submittedAt])
+}
+
 enum UserRole {
   EMPLOYEE
   MANAGER
@@ -110,4 +131,11 @@ enum EntryType {
   CLOCK_OUT
   BREAK_START
   BREAK_END
+}
+
+enum SignupStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CONTACTED
 }

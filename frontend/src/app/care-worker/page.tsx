@@ -181,6 +181,17 @@ function LoginForm({ onLogin }: { onLogin: (user: User) => void }) {
               ← Back to Home
             </a>
           </div>
+
+          {/* Test Care Worker Login Details */}
+          <div className="mt-4 p-3 bg-orange-200 rounded-lg border border-gray-200">
+            <p className="text-sm text-gray-600 text-center mb-2">
+              <strong>Test Care Worker Login:</strong>
+            </p>
+            <div className="text-xs text-gray-500 text-center space-y-1">
+              <p><strong>Employee ID:</strong> EMP001</p>
+              <p><strong>Password:</strong> employee123</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

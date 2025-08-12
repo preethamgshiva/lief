@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-This is my submission for the Lief WebDev Engineer Task - a healthcare worker clock-in/out application built as a web application that can be used by healthcare organizations (such as hospitals) to have their care workers easily record and track when they come in for a shift and leave a shift.
+This is my submission for the Lief WebDev Engineer Task - a healthcare worker clock-in/out application built as a web application that can be used by healthcare organizations (such as hospitals) to have their care workers easily record and track when they come in for a shift and leave a shift. You can visit the site through https://lief-task.vercel.app .
 
-## Task Requirements & Implementation Status
+## Tasks Implemented
 
-### ✅ Required Features - Manager Portal
+### Manager Portal
 
 #### 1. Location Perimeter Setting
 - **Description**: Managers can set a location perimeter (e.g., within 2km of a location) where care workers can clock in
@@ -31,7 +31,7 @@ This is my submission for the Lief WebDev Engineer Task - a healthcare worker cl
 - **Implementation**: Charts and metrics using Recharts library
 - **Location**: `frontend/src/components/StaffDashboard.tsx`
 
-### ✅ Required Features - Care Worker Portal
+### Care Worker Portal
 
 #### 1. Clock In Functionality
 - **Description**: Care workers can clock in when they enter the perimeter
@@ -54,42 +54,23 @@ This is my submission for the Lief WebDev Engineer Task - a healthcare worker cl
 - **Description**: When clocking out, care workers can provide an optional note
 - **Implementation**: Text area for notes during clock-out process
 
-### ⚠️ Partially Implemented Features
+### Partially Implemented Features
 
 #### User Authentication
-- **Status**: ⚠️ **PARTIALLY IMPLEMENTED**
+- **Status**: **PARTIALLY IMPLEMENTED**
 - **Description**: Users should be able to register for account using username/password with Google login and email login using Auth0
 - **Current Implementation**: Custom authentication system with username/password
-- **Missing**: Auth0 integration, Google OAuth, user registration
 - **Location**: `frontend/src/lib/auth-service.ts`
-
-### ❌ Not Implemented Features
-
-#### UI/UX Design Library
-- **Status**: ❌ **NOT IMPLEMENTED**
-- **Description**: Application should use Grommet or Ant as the design library
-- **Current Implementation**: Tailwind CSS for styling
-- **Reason**: Chose Tailwind CSS for rapid development and modern design
-
-#### Progressive Web App (PWA)
-- **Status**: ❌ **NOT IMPLEMENTED**
-- **Description**: PWA with service workers, offline functionality, and home screen installation
-- **Current Implementation**: Standard web application
-
-#### Automatic Location Detection
-- **Status**: ❌ **NOT IMPLEMENTED**
-- **Description**: Notify care workers when entering/leaving perimeter
-- **Current Implementation**: Manual clock-in/out process
 
 ## Technical Implementation
 
 ### Frontend Technology Stack
 - **Framework**: Next.js 15.4.6 with App Router
 - **Language**: TypeScript 5
-- **Styling**: Tailwind CSS 3.3.0 (instead of Grommet/Ant as specified)
+- **Styling**: Tailwind CSS 3.3.0 (Could not implement Ant Design or Grommet due to connection issues)
 - **State Management**: React Hooks and Context (as required)
 - **Charts**: Recharts 3.1.2 for analytics dashboard
-- **Authentication**: Custom authentication system (instead of Auth0 as specified)
+- **Authentication**: Custom authentication system and Google oAuth (instead of Auth0 as specified)
 
 ### Backend Infrastructure
 - **Database**: MongoDB with Prisma ORM (as recommended)
@@ -217,32 +198,23 @@ lief-main/
 - Optional notes for time entries
 - Role-based access control
 
-### ⚠️ **Partially Implemented**
-- User authentication (custom system instead of Auth0)
-- User registration (basic implementation)
-
-### ❌ **Not Implemented**
-- Grommet/Ant design library (used Tailwind CSS instead)
-- Auth0 integration
-- Google OAuth login
-- PWA functionality
-- Automatic location notifications
-- GraphQL backend (used REST API instead)
-
 ## Design Decisions & Trade-offs
 
 ### Why Tailwind CSS Instead of Grommet/Ant?
+- **Connection Issues**: Had connectivity issues with AntD while deploying to Vercel
 - **Rapid Development**: Faster to build responsive UI components
 - **Modern Design**: Better visual appeal and modern aesthetics
 - **Flexibility**: More control over styling and customization
 - **Performance**: Smaller bundle size and better performance
 
 ### Why Custom Authentication Instead of Auth0?
+-**Connectivity Issues**: Since i am using free tier of MongoDB, I was getting Connection Timed out Response with Auth0 implemented
 - **Simplicity**: Faster to implement for MVP
 - **Learning**: Better understanding of authentication flows
 - **Customization**: More control over user roles and permissions
 
 ### Why REST API Instead of GraphQL?
+-**Skill Fit**:  I have stronger expertise with REST, so I could build faster and more confidently
 - **Simplicity**: Faster to implement for MVP
 - **Familiarity**: More straightforward for this use case
 - **Performance**: Adequate for the current feature set
@@ -252,13 +224,10 @@ lief-main/
 If I were to continue developing this application, I would:
 
 1. **Integrate Auth0** for proper authentication
-2. **Add Google OAuth** for social login
-3. **Implement PWA features** with service workers
-4. **Add automatic location notifications**
-5. **Migrate to GraphQL** for better data fetching
-6. **Add real-time notifications** using WebSockets
-7. **Implement offline functionality** for PWA
-8. **Add push notifications** for location alerts
+2. **Migrate to GraphQL** for better data fetching
+3. **Add real-time notifications** using WebSockets
+4. **Implement offline functionality** for PWA
+5. **Add push notifications** for location alerts
 
 ## Conclusion
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { GoogleLogin } from '@react-oauth/google';
 
 interface SignupFormData {
   name: string;
@@ -9,6 +10,12 @@ interface SignupFormData {
   experience: string;
   preferredDepartment: string;
   message: string;
+}
+
+interface GoogleUserInfo {
+  name: string;
+  email: string;
+  picture?: string;
 }
 
 export default function CareWorkerSignup() {
@@ -23,6 +30,7 @@ export default function CareWorkerSignup() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isGoogleSignup, setIsGoogleSignup] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -30,6 +38,42 @@ export default function CareWorkerSignup() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      // Decode the JWT token to get user info
+      const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credentialResponse.credential}`);
+      const userInfo = await response.json();
+      
+      // Auto-fill the form with Google data
+      setFormData(prev => ({
+        ...prev,
+        name: userInfo.name || '',
+        email: userInfo.email || '',
+        phone: prev.phone // Keep existing phone if user already entered it
+      }));
+      
+      setIsGoogleSignup(true);
+      setMessage({ 
+        type: 'success', 
+        text: 'Google signup successful! Please complete the remaining fields and submit your application.' 
+      });
+      
+    } catch (error) {
+      console.error('Error processing Google signup:', error);
+      setMessage({ 
+        type: 'error', 
+        text: 'Google signup failed. Please use the manual form instead.' 
+      });
+    }
+  };
+
+  const handleGoogleError = () => {
+    setMessage({ 
+      type: 'error', 
+      text: 'Google signup failed. Please use the manual form instead.' 
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +87,10 @@ export default function CareWorkerSignup() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          signupMethod: isGoogleSignup ? 'google' : 'manual'
+        }),
       });
 
       const data = await response.json();
@@ -63,6 +110,7 @@ export default function CareWorkerSignup() {
           preferredDepartment: '',
           message: ''
         });
+        setIsGoogleSignup(false);
       } else {
         throw new Error(data.error || 'Failed to submit signup request');
       }
@@ -86,6 +134,30 @@ export default function CareWorkerSignup() {
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Join Our Team</h2>
         <p className="text-gray-600">Interested in becoming a care worker? Submit your application below!</p>
+      </div>
+
+      {/* Google Signup Button */}
+      <div className="mb-6">
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+          useOneTap
+          theme="outline"
+          size="large"
+          text="signup_with"
+          shape="rectangular"
+          width="100%"
+        />
+      </div>
+
+      {/* Divider */}
+      <div className="relative mb-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-300" />
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2 bg-white text-gray-500">OR</span>
+        </div>
       </div>
 
       {/* Message Display */}

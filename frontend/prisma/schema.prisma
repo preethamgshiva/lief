@@ -108,6 +108,7 @@ model SignupRequest {
   preferredDepartment  String?
   message              String?
   status               SignupStatus     @default(PENDING)
+  signupMethod         SignupMethod     @default(MANUAL)
   submittedAt          DateTime         @default(now())
   reviewedAt           DateTime?
   reviewedBy           String?          @db.ObjectId
@@ -118,6 +119,7 @@ model SignupRequest {
   @@map("signup_requests")
   @@index([status])
   @@index([submittedAt])
+  @@index([signupMethod])
 }
 
 enum UserRole {
@@ -138,4 +140,11 @@ enum SignupStatus {
   APPROVED
   REJECTED
   CONTACTED
+}
+
+enum SignupMethod {
+  MANUAL
+  GOOGLE
+  FACEBOOK
+  LINKEDIN
 }

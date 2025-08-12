@@ -4,7 +4,7 @@ import { prisma } from '../../../lib/prisma';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { name, email, phone, experience, preferredDepartment, message } = body;
+        const { name, email, phone, experience, preferredDepartment, message, signupMethod = 'MANUAL' } = body;
 
         // Validate required fields
         if (!name || !email || !phone || !experience) {
@@ -57,17 +57,19 @@ export async function POST(request: NextRequest) {
                 preferredDepartment: preferredDepartment || null,
                 message: message || null,
                 status: 'PENDING',
+                signupMethod: signupMethod || 'MANUAL',
                 submittedAt: new Date()
             }
         });
 
-        console.log('✅ New signup request created:', signupRequest.email);
+        console.log(`✅ New signup request created via ${signupMethod}:`, signupRequest.email);
 
         return NextResponse.json({
             success: true,
             message: 'Signup request submitted successfully',
             requestId: signupRequest.id,
-            timestamp: signupRequest.submittedAt
+            timestamp: signupRequest.submittedAt,
+            signupMethod: signupRequest.signupMethod
         });
 
     } catch (error) {

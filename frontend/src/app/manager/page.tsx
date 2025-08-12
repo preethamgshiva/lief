@@ -155,11 +155,12 @@ function LoginForm({ onLogin }: { onLogin: (user: User) => void }) {
 
 // Main dashboard component
 function ManagerDashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
-  const [activeView, setActiveView] = useState<'overview' | 'charts' | 'staff' | 'facility' | 'applications'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'charts' | 'staff' | 'facility' | 'applications' | 'timeTracking'>('overview');
   const [staffMembers, setStaffMembers] = useState<any[]>([]);
   const [timeEntries, setTimeEntries] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedStaffId, setSelectedStaffId] = useState<string>('');
 
   useEffect(() => {
     fetchDashboardData();
@@ -291,6 +292,16 @@ function ManagerDashboard({ user, onLogout }: { user: User; onLogout: () => void
               }`}
             >
               👥 Staff Management
+            </button>
+            <button
+              onClick={() => setActiveView('timeTracking')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeView === 'timeTracking'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              ⏰ Staff Time Tracking
             </button>
             <button
               onClick={() => setActiveView('facility')}
@@ -432,6 +443,249 @@ function ManagerDashboard({ user, onLogout }: { user: User; onLogout: () => void
             />
             <div className="mt-8">
               <StaffDashboard onRefresh={handleRefresh} refreshTrigger={0} />
+            </div>
+          </div>
+        )}
+
+        {activeView === 'timeTracking' && (
+          <div className="mb-8">
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Staff Time Tracking</h3>
+              <p className="text-gray-600 mb-4">Select a staff member to view their detailed time entry history</p>
+              
+              {/* Staff Selection */}
+              <div className="mb-6">
+                <label htmlFor="staffSelect" className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Staff Member
+                </label>
+                <select
+                  id="staffSelect"
+                  value={selectedStaffId}
+                  onChange={(e) => setSelectedStaffId(e.target.value)}
+                  className="w-full md:w-80 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                >
+                  <option value="">Choose a staff member...</option>
+                  {staffMembers.map((staff) => (
+                    <option key={staff.id} value={staff.id}>
+                      {staff.user?.name || 'Unknown'} - {staff.employeeId} ({staff.department})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Time Tracking Table */}
+              {selectedStaffId && (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Time
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Action
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Location
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Notes
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Duration
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {(() => {
+                        const selectedStaff = staffMembers.find(s => s.id === selectedStaffId);
+                        const staffTimeEntries = timeEntries.filter(entry => 
+                          entry.employeeId === selectedStaffId
+                        ).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+                        if (staffTimeEntries.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                <p>No time entries found for this staff member</p>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // Group entries by date and calculate durations
+                        const entriesByDate: { [key: string]: any[] } = {};
+                        staffTimeEntries.forEach(entry => {
+                          const date = new Date(entry.timestamp).toDateString();
+                          if (!entriesByDate[date]) {
+                            entriesByDate[date] = [];
+                          }
+                          entriesByDate[date].push(entry);
+                        });
+
+                        const rows: React.ReactElement[] = [];
+                        Object.entries(entriesByDate).forEach(([date, dayEntries]) => {
+                          // Sort entries by time for the day
+                          dayEntries.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+                          
+                          let currentClockIn: Date | null = null;
+                          let totalHours = 0;
+
+                          dayEntries.forEach((entry, index) => {
+                            const isClockIn = entry.type === 'CLOCK_IN';
+                            const isClockOut = entry.type === 'CLOCK_OUT';
+                            
+                            if (isClockIn) {
+                              currentClockIn = new Date(entry.timestamp);
+                            } else if (isClockOut && currentClockIn) {
+                              const duration = (new Date(entry.timestamp).getTime() - currentClockIn.getTime()) / (1000 * 60 * 60);
+                              totalHours += duration;
+                              currentClockIn = null;
+                            }
+
+                            const rowClass = index === 0 ? 'border-t-2 border-blue-200' : '';
+                            
+                            rows.push(
+                              <tr key={entry.id} className={`hover:bg-gray-50 ${rowClass}`}>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  {index === 0 && (
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {new Date(date).toLocaleDateString('en-US', { 
+                                        weekday: 'short', 
+                                        month: 'short', 
+                                        day: 'numeric',
+                                        year: 'numeric'
+                                      })}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {new Date(entry.timestamp).toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit'
+                                  })}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    entry.type === 'CLOCK_IN' 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : entry.type === 'CLOCK_OUT'
+                                      ? 'bg-red-100 text-red-800'
+                                      : entry.type === 'BREAK_START'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-blue-100 text-blue-800'
+                                  }`}>
+                                    {entry.type === 'CLOCK_IN' ? '🟢 Clock In' : 
+                                     entry.type === 'CLOCK_OUT' ? '🔴 Clock Out' :
+                                     entry.type === 'BREAK_START' ? '🟡 Break Start' : '🔵 Break End'}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {entry.latitude && entry.longitude ? (
+                                    <div className="text-xs">
+                                      <div className="font-medium">📍 Coordinates:</div>
+                                      <div>{entry.latitude.toFixed(6)}, {entry.longitude.toFixed(6)}</div>
+                                      <div className="text-gray-500 mt-1">
+                                        <a 
+                                          href={`https://www.google.com/maps?q=${entry.latitude},${entry.longitude}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 hover:text-blue-800 underline"
+                                        >
+                                          View on Map
+                                        </a>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <span className="text-gray-400 text-xs">No location data</span>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {entry.notes ? (
+                                    <div className="max-w-xs">
+                                      <span className="text-gray-700">{entry.notes}</span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-gray-400 text-xs">-</span>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {index === dayEntries.length - 1 && totalHours > 0 ? (
+                                    <span className="font-medium text-blue-600">
+                                      {totalHours.toFixed(2)}h total
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400 text-xs">-</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          });
+                        });
+
+                        return rows;
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Summary Information */}
+              {selectedStaffId && (() => {
+                const selectedStaff = staffMembers.find(s => s.id === selectedStaffId);
+                const staffTimeEntries = timeEntries.filter(entry => entry.employeeId === selectedStaffId);
+                
+                if (staffTimeEntries.length === 0) return null;
+
+                // Calculate summary statistics
+                const totalEntries = staffTimeEntries.length;
+                const clockIns = staffTimeEntries.filter(e => e.type === 'CLOCK_IN').length;
+                const clockOuts = staffTimeEntries.filter(e => e.type === 'CLOCK_OUT').length;
+                
+                // Calculate total hours worked
+                let totalHours = 0;
+                let currentClockIn: Date | null = null;
+                
+                staffTimeEntries
+                  .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+                  .forEach(entry => {
+                    if (entry.type === 'CLOCK_IN') {
+                      currentClockIn = new Date(entry.timestamp);
+                    } else if (entry.type === 'CLOCK_OUT' && currentClockIn) {
+                      const duration = (new Date(entry.timestamp).getTime() - currentClockIn.getTime()) / (1000 * 60 * 60);
+                      totalHours += duration;
+                      currentClockIn = null;
+                    }
+                  });
+
+                return (
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h4 className="text-md font-semibold text-gray-800 mb-3">Summary for {selectedStaff?.user?.name}</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium text-gray-600">Total Entries:</span>
+                        <div className="text-lg font-bold text-blue-600">{totalEntries}</div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-600">Clock-ins:</span>
+                        <div className="text-lg font-bold text-green-600">{clockIns}</div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-600">Clock-outs:</span>
+                        <div className="text-lg font-bold text-red-600">{clockOuts}</div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-600">Total Hours:</span>
+                        <div className="text-lg font-bold text-purple-600">{totalHours.toFixed(2)}h</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         )}

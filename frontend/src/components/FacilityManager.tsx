@@ -12,8 +12,8 @@ interface FacilityLocation {
 }
 
 const DEFAULT_FACILITY_LOCATION: FacilityLocation = {
-  latitude: 40.7128,
-  longitude: -74.0060,
+  latitude: 12.927538,
+  longitude: 77.526807,
 };
 
 const DEFAULT_PERIMETER_RADIUS = 0.5; // 500 meters

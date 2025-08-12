@@ -5,7 +5,7 @@ export interface Location {
 
 // Default facility configuration
 export const DEFAULT_FACILITY_LOCATION: Location = {
-  latitude: 12.927684, // Example: New York City coordinates
+  latitude: 12.927538, // Example: Global Academy of Technology (My college)
   longitude: 77.526807
 };
 

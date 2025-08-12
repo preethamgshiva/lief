@@ -4,9 +4,11 @@
 
 This is my submission for the Lief WebDev Engineer Task - a healthcare worker clock-in/out application built as a web application that can be used by healthcare organizations (such as hospitals) to have their care workers easily record and track when they come in for a shift and leave a shift. You can visit the site through https://lief-task.vercel.app .
 
+---
 ## Tasks Implemented
 
-### Manager Portal
+<details>
+<summary><h3>Manager Portal</h3></summary>
 
 #### 1. Location Perimeter Setting
 - **Description**: Managers can set a location perimeter (e.g., within 2km of a location) where care workers can clock in
@@ -31,7 +33,10 @@ This is my submission for the Lief WebDev Engineer Task - a healthcare worker cl
 - **Implementation**: Charts and metrics using Recharts library
 - **Location**: `frontend/src/components/StaffDashboard.tsx`
 
-### Care Worker Portal
+</details>
+
+<details>
+<summary><h3>Care Worker Portal</h3></summary>
 
 #### 1. Clock In Functionality
 - **Description**: Care workers can clock in when they enter the perimeter
@@ -54,36 +59,9 @@ This is my submission for the Lief WebDev Engineer Task - a healthcare worker cl
 - **Description**: When clocking out, care workers can provide an optional note
 - **Implementation**: Text area for notes during clock-out process
 
-### Partially Implemented Features
+</details>
 
-#### User Authentication
-- **Status**: **PARTIALLY IMPLEMENTED**
-- **Description**: Users should be able to register for account using username/password with Google login and email login using Auth0
-- **Current Implementation**: Custom authentication system with username/password
-- **Location**: `frontend/src/lib/auth-service.ts`
-
-## Technical Implementation
-
-### Frontend Technology Stack
-- **Framework**: Next.js 15.4.6 with App Router
-- **Language**: TypeScript 5
-- **Styling**: Tailwind CSS 3.3.0 (Could not implement Ant Design or Grommet due to connection issues)
-- **State Management**: React Hooks and Context (as required)
-- **Charts**: Recharts 3.1.2 for analytics dashboard
-- **Authentication**: Custom authentication system and Google oAuth (instead of Auth0 as specified)
-
-### Backend Infrastructure
-- **Database**: MongoDB with Prisma ORM (as recommended)
-- **API Routes**: Next.js API routes (instead of GraphQL as specified)
-- **Geolocation**: Browser Geolocation API with Haversine formula
-- **Real-time Updates**: Automatic data synchronization
-
-### Database Schema
-The system uses a comprehensive database design with Prisma:
-- **User Management**: Centralized user accounts with role-based permissions
-- **Employee Records**: Staff information including departments, positions, and hire dates
-- **Time Tracking**: Time entry system with location data and notes
-- **Facility Settings**: Configurable facility parameters and perimeter settings
+---
 
 ## Project Structure
 
@@ -108,39 +86,22 @@ lief-main/
 │   └── README.md            # Project documentation
 └── README.md                # This file
 ```
+<p>Note: Only important files are mentioned in this Structure.</p>
 
-## Key Features Implemented
-
-### 1. **Geolocation-Based Clock-in System**
-- GPS perimeter validation using Haversine formula
-- Configurable facility radius (default: 100 meters)
-- Real-time location checking during clock-in attempts
-
-### 2. **Comprehensive Manager Dashboard**
-- Staff overview with real-time status
-- Individual staff time tracking with detailed history
-- Analytics dashboard with charts and metrics
-- Facility settings management
-
-### 3. **Care Worker Portal**
-- Simple clock-in/out interface
-- Location validation and error handling
-- Optional notes for each time entry
-- Time entry history and status display
-
-### 4. **Real-time Data Management**
-- Live updates of staff status
-- Automatic data synchronization
-- Comprehensive time entry tracking
-- Location data storage and retrieval
+---
 
 ## Setup and Installation
 
-### Prerequisites
-- Node.js 18.0.0 or higher
-- npm or yarn package manager
-- MongoDB database instance
-- Modern web browser with geolocation support
+<details>
+<summary><strong>Prerequisites</strong></summary>
+
+- Node.js 18.0.0 or higher  
+- npm or yarn package manager  
+- MongoDB database instance  
+- Modern web browser with geolocation support  
+
+</details>
+
 
 ### Local Development Setup
 
@@ -185,6 +146,76 @@ lief-main/
 ### Care Worker Access
 - **Employee ID**: EMP001
 - **Password**: employee123
+
+### Other ID's and passwords can be found on the manager portal.
+
+## Technical Implementation
+
+### Frontend Technology Stack
+- **Framework**: Next.js 15.4.6 with App Router
+- **Language**: TypeScript 5
+- **Styling**: Tailwind CSS 3.3.0 (Could not implement Ant Design or Grommet due to connection issues)
+- **State Management**: React Hooks and Context (as required)
+- **Charts**: Recharts 3.1.2 for analytics dashboard
+- **Authentication**: Custom authentication system and Google oAuth (instead of Auth0 as specified)
+
+### Backend Infrastructure
+- **Database**: MongoDB with Prisma ORM (as recommended)
+- **API Routes**: Next.js API routes (instead of GraphQL as specified)
+- **Geolocation**: Browser Geolocation API with Haversine formula
+- **Real-time Updates**: Automatic data synchronization
+
+### Database Schema
+The system uses a comprehensive database design with Prisma:
+- **User Management**: Centralized user accounts with role-based permissions
+- **Employee Records**: Staff information including departments, positions, and hire dates
+- **Time Tracking**: Time entry system with location data and notes
+- **Facility Settings**: Configurable facility parameters and perimeter settings
+
+
+## Key Features Implemented
+
+<details>
+<summary><strong>1. Geolocation-Based Clock-in System</strong></summary>
+
+- GPS perimeter validation using Haversine formula  
+- Configurable facility radius (default: 100 meters)  
+- Real-time location checking during clock-in attempts  
+
+</details>
+
+<details>
+<summary><strong>2. Comprehensive Manager Dashboard</strong></summary>
+
+- Staff overview with real-time status  
+- Individual staff time tracking with detailed history  
+- Analytics dashboard with charts and metrics  
+- Facility settings management  
+
+</details>
+
+<details>
+<summary><strong>3. Care Worker Portal</strong></summary>
+
+- Simple clock-in/out interface  
+- Location validation and error handling  
+- Optional notes for each time entry  
+- Time entry history and status display  
+
+</details>
+
+<details>
+<summary><strong>4. Real-time Data Management</strong></summary>
+
+- Live updates of staff status  
+- Automatic data synchronization  
+- Comprehensive time entry tracking  
+- Location data storage and retrieval  
+
+</details>
+
+---
+
 
 ## What I Attempted vs. What Was Specified
 
@@ -241,6 +272,7 @@ This submission demonstrates a fully functional MVP of the healthcare worker clo
 - ✅ Optional notes system
 - ✅ Responsive design for mobile and web
 
+- ❌ Could not implement offline PWA as location services need internet.
 The application is production-ready for basic use cases and provides a solid foundation for future enhancements.
 
 ---
